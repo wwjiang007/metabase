@@ -28,6 +28,14 @@ The entire Metabase application is compiled and assembled into a single .jar fil
 
 After running the build script simply look in `target/uberjar` for the output .jar file and you are ready to go.
 
+### Build uberjar with a container
+
+You can use a container to build Metabase so you don't pollute your local environment. We've made a multi-stage build that performs all the necessary steps to output an Uberjar. Simply do:
+```
+DOCKER_BUILDKIT=1 docker build -f Dockerfile_export_jar --output target/uberjar/ .
+```
+and you will have a metabase.jar on the target/uberjar/ folder ready to run.
+
 ## Building macOS App (`Metabase.app`)
 
 NOTE: These instructions are only for packaging a built Metabase uberjar into `Metabase.app`. They are not useful if your goal is to work on Metabase itself; for development, please see above.
