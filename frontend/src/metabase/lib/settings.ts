@@ -126,8 +126,7 @@ class Settings {
 
   on(key: SettingName, callback: SettingListener) {
     this._listeners[key] = this._listeners[key] || [];
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this._listeners[key]!.push(callback);
+    this._listeners[key]?.push(callback);
   }
 
   // these are all special accessors which provide a lookup of a property plus some additional help
@@ -192,7 +191,7 @@ class Settings {
 
   docsUrl(page = "", anchor = "") {
     let { tag } = this.get("version", {});
-    const matches = tag && tag.match(/v[01]\.(\d+)(?:\.\d+)?(-.*)?/);
+    const matches = tag?.match(/v[01]\.(\d+)(?:\.\d+)?(-.*)?/);
 
     if (matches) {
       if (
