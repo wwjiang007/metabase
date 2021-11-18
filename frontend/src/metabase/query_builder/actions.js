@@ -55,7 +55,9 @@ import {
   getNativeEditorSelectedText,
   getSnippetCollectionId,
   getQueryResults,
+  isBasedOnExistingQuestion,
 } from "./selectors";
+import { trackNewQuestionSaved } from "./tracking";
 
 import { MetabaseApi, CardApi, UserApi } from "metabase/services";
 
@@ -837,13 +839,15 @@ export const navigateToNewCardInsideQB = createThunkAction(
   NAVIGATE_TO_NEW_CARD,
   ({ nextCard, previousCard }) => {
     return async (dispatch, getState) => {
-      if (cardIsEquivalent(previousCard, nextCard)) {
+      if (previousCard === nextCard) {
+        // Do not reload questions with breakouts when clicked on a legend item
+      } else if (cardIsEquivalent(previousCard, nextCard)) {
         // This is mainly a fallback for scenarios where a visualization legend is clicked inside QB
         dispatch(setCardAndRun(await loadCard(nextCard.id)));
       } else {
         const card = getCardAfterVisualizationClick(nextCard, previousCard);
         const url = Urls.question(null, card);
-        if (shouldOpenInBlankWindow(url, { blankOnMetaKey: true })) {
+        if (shouldOpenInBlankWindow(url, { blankOnMetaOrCtrlKey: true })) {
           open(url);
         } else {
           dispatch(onCloseSidebars());
@@ -1028,6 +1032,11 @@ export const apiCreateQuestion = question => {
       "QueryBuilder",
       "Create Card",
       createdQuestion.query().datasetQuery().type,
+    );
+    trackNewQuestionSaved(
+      question,
+      createdQuestion,
+      isBasedOnExistingQuestion(getState()),
     );
 
     // Saving a card, locks in the current display as though it had been
@@ -1426,6 +1435,19 @@ export const turnQuestionIntoDataset = () => async (dispatch, getState) => {
     addUndo({
       message: t`This is a dataset now.`,
       actions: [apiUpdateQuestion(question)],
+    }),
+  );
+};
+
+export const turnDatasetIntoQuestion = () => async (dispatch, getState) => {
+  const dataset = getQuestion(getState());
+  const question = dataset.setDataset(false);
+  await dispatch(apiUpdateQuestion(question));
+
+  dispatch(
+    addUndo({
+      message: t`This is a question now.`,
+      actions: [apiUpdateQuestion(dataset)],
     }),
   );
 };

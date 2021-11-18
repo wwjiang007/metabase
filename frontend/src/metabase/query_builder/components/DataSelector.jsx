@@ -6,7 +6,10 @@ import { t } from "ttag";
 import cx from "classnames";
 import _ from "underscore";
 
-import { SAVED_QUESTIONS_VIRTUAL_DB_ID } from "metabase/lib/saved-questions";
+import {
+  isVirtualCardId,
+  SAVED_QUESTIONS_VIRTUAL_DB_ID,
+} from "metabase/lib/saved-questions";
 
 import ListSearchField from "metabase/components/ListSearchField";
 import ExternalLink from "metabase/components/ExternalLink";
@@ -25,15 +28,15 @@ import Search from "metabase/entities/search";
 import {
   SearchResults,
   convertSearchResultToTableLikeItem,
-  isSavedQuestion,
 } from "./data-search";
 import SavedQuestionPicker from "./saved-question-picker/SavedQuestionPicker";
 
 import { getMetadata } from "metabase/selectors/metadata";
 
 import {
-  DataBucketIcon,
-  DataBucketDescription,
+  DataBucketList,
+  DataBucketListItem,
+  PickerSpinner,
   RawDataBackButton,
 } from "./DataSelector.styled";
 import "./DataSelector.css";
@@ -57,6 +60,15 @@ const TABLE_STEP = "TABLE";
 // chooses a table field (table has already been selected)
 const FIELD_STEP = "FIELD";
 
+export const DataSourceSelector = props => (
+  <DataSelector
+    steps={[DATA_BUCKET_STEP, DATABASE_STEP, SCHEMA_STEP, TABLE_STEP]}
+    combineDatabaseSchemaSteps
+    getTriggerElementContent={TableTriggerContent}
+    {...props}
+  />
+);
+
 export const DatabaseDataSelector = props => (
   <DataSelector
     steps={[DATABASE_STEP]}
@@ -67,7 +79,7 @@ export const DatabaseDataSelector = props => (
 
 export const DatabaseSchemaAndTableDataSelector = props => (
   <DataSelector
-    steps={[DATA_BUCKET_STEP, DATABASE_STEP, SCHEMA_STEP, TABLE_STEP]}
+    steps={[DATABASE_STEP, SCHEMA_STEP, TABLE_STEP]}
     combineDatabaseSchemaSteps
     getTriggerElementContent={TableTriggerContent}
     {...props}
@@ -420,7 +432,7 @@ export class UnconnectedDataSelector extends Component {
     const invalidTable =
       selectedSchema &&
       selectedTable &&
-      !isSavedQuestion(selectedTable.id) &&
+      !isVirtualCardId(selectedTable.id) &&
       selectedTable.schema.id !== selectedSchema.id;
     const invalidField =
       selectedTable &&
@@ -823,7 +835,7 @@ export class UnconnectedDataSelector extends Component {
     return null;
   }
 
-  isSavedQuestionSelected = () => isSavedQuestion(this.props.selectedTableId);
+  isSavedQuestionSelected = () => isVirtualCardId(this.props.selectedTableId);
 
   handleSavedQuestionSelect = async table => {
     if (this.props.setSourceTableFn) {
@@ -975,48 +987,38 @@ export class UnconnectedDataSelector extends Component {
   }
 }
 
-const DataBucketPicker = ({ selectedDataBucketId, onChangeDataBucket }) => {
-  const sections = [
+const DataBucketPicker = ({ onChangeDataBucket }) => {
+  const BUCKETS = [
     {
-      items: [
-        {
-          id: DATA_BUCKET.DATASETS,
-          index: 0,
-          icon: "dataset",
-          name: t`Datasets`,
-          description: t`The best starting place for new questions.`,
-        },
-        {
-          id: DATA_BUCKET.RAW_DATA,
-          index: 1,
-          icon: "database",
-          name: t`Raw Data`,
-          description: t`Unaltered tables in connected databases.`,
-        },
-        {
-          id: DATA_BUCKET.SAVED_QUESTIONS,
-          index: 2,
-          name: t`Saved Questions`,
-          icon: "folder",
-          description: t`Use any question’s results to start a new question.`,
-        },
-      ],
+      id: DATA_BUCKET.DATASETS,
+      icon: "dataset",
+      name: t`Datasets`,
+      description: t`The best starting place for new questions.`,
+    },
+    {
+      id: DATA_BUCKET.RAW_DATA,
+      icon: "database",
+      name: t`Raw Data`,
+      description: t`Unaltered tables in connected databases.`,
+    },
+    {
+      id: DATA_BUCKET.SAVED_QUESTIONS,
+      name: t`Saved Questions`,
+      icon: "folder",
+      description: t`Use any question’s results to start a new question.`,
     },
   ];
 
   return (
-    <AccordionList
-      id="DataBucketPicker"
-      className="text-brand"
-      sections={sections}
-      onChange={item => onChangeDataBucket(item.id)}
-      itemIsSelected={item => item.id === selectedDataBucketId}
-      renderItemIcon={item => <DataBucketIcon name={item.icon} size={18} />}
-      getItemIconPosition={() => "near-name"}
-      renderItemDescription={item => (
-        <DataBucketDescription>{item.description}</DataBucketDescription>
-      )}
-    />
+    <DataBucketList>
+      {BUCKETS.map(bucket => (
+        <DataBucketListItem
+          {...bucket}
+          key={bucket.id}
+          onSelect={onChangeDataBucket}
+        />
+      ))}
+    </DataBucketList>
   );
 };
 
@@ -1133,11 +1135,13 @@ const DatabaseSchemaPicker = ({
       selectedDatabase.id === database.id &&
       database.schemas.length === 0 &&
       isLoading,
+    active: database.initial_sync,
   }));
 
   if (hasBackButton) {
     sections.unshift({
       name: <RawDataBackButton />,
+      active: true,
     });
   }
 
@@ -1181,6 +1185,9 @@ const DatabaseSchemaPicker = ({
         item.icon && (
           <Icon className="Icon text-default" name={item.icon} size={18} />
         )
+      }
+      renderSectionExtra={item =>
+        !item.active && <PickerSpinner size={16} borderWidth={2} />
       }
       renderItemIcon={() => <Icon name="folder" size={16} />}
       initiallyOpenSection={openSection}
@@ -1262,7 +1269,7 @@ const TablePicker = ({
               ? item.table.id === selectedTable.id
               : false
           }
-          itemIsClickable={item => item.table}
+          itemIsClickable={item => item.table && item.table.initial_sync}
           renderItemIcon={item =>
             item.table ? <Icon name="table2" size={18} /> : null
           }

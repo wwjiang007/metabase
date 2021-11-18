@@ -64,6 +64,7 @@ export default class AccordionList extends Component {
 
     // section getters/render props
     renderSectionIcon: PropTypes.func,
+    renderSectionExtra: PropTypes.func,
 
     // item getters/render props
     itemIsSelected: PropTypes.func,
@@ -73,7 +74,6 @@ export default class AccordionList extends Component {
     renderItemIcon: PropTypes.func,
     renderItemExtra: PropTypes.func,
     getItemClassName: PropTypes.func,
-    getItemIconPosition: PropTypes.func,
 
     alwaysTogglable: PropTypes.bool,
     alwaysExpanded: PropTypes.bool,
@@ -103,6 +103,7 @@ export default class AccordionList extends Component {
     // section getters/render props
     renderSectionIcon: section =>
       section.icon && <Icon name={section.icon} size={18} />,
+    renderSectionExtra: () => null,
 
     // item getters/render props
     itemIsClickable: item => true,
@@ -112,7 +113,6 @@ export default class AccordionList extends Component {
     renderItemExtra: item => null,
     renderItemIcon: item => item.icon && <Icon name={item.icon} size={18} />,
     getItemClassName: item => item.className,
-    getItemIconPosition: item => "left-block",
   };
 
   componentDidMount() {
@@ -469,6 +469,7 @@ const AccordionListCell = ({
   alwaysExpanded,
   toggleSection,
   renderSectionIcon,
+  renderSectionExtra,
   renderItemName,
   renderItemDescription,
   renderItemIcon,
@@ -479,7 +480,6 @@ const AccordionListCell = ({
   showItemArrows,
   itemTestId,
   getItemClassName,
-  getItemIconPosition,
 }) => {
   const { type, section, sectionIndex, item, itemIndex, isLastItem } = row;
   let content;
@@ -495,6 +495,7 @@ const AccordionListCell = ({
       );
     } else {
       const icon = renderSectionIcon(section, sectionIndex);
+      const extra = renderSectionExtra(section, sectionIndex);
       const name = section.name;
       content = (
         <div
@@ -515,9 +516,12 @@ const AccordionListCell = ({
               {icon}
             </span>
           )}
-          {name && <h3 className="List-section-title text-wrap">{name}</h3>}
+          {name && (
+            <h3 className="List-section-title flex-full text-wrap">{name}</h3>
+          )}
+          {extra}
           {sections.length > 1 && section.items && section.items.length > 0 && (
-            <span className="flex-align-right hover-child">
+            <span className="flex-align-right ml1 hover-child">
               <Icon
                 name={
                   sectionIsExpanded(sectionIndex) ? "chevronup" : "chevrondown"
@@ -552,16 +556,8 @@ const AccordionListCell = ({
     const isSelected = itemIsSelected(item, itemIndex);
     const isClickable = itemIsClickable(item, itemIndex);
     const icon = renderItemIcon(item, itemIndex, isSelected);
-    const iconPosition = getItemIconPosition(item, itemIndex);
     const name = renderItemName(item, itemIndex, isSelected);
     const description = renderItemDescription(item, itemIndex, isSelected);
-    const isLeftBlockIcon = iconPosition === "left-block";
-    const iconClassNames = cx("List-item-icon text-default", {
-      "flex align-center": isLeftBlockIcon,
-    });
-    const descriptionClassNames = cx("List-item-description text-wrap", {
-      ml1: isLeftBlockIcon,
-    });
     content = (
       <div
         data-testid={itemTestId}
@@ -583,20 +579,17 @@ const AccordionListCell = ({
           )}
           onClick={isClickable ? () => onChange(item) : null}
         >
-          {icon && iconPosition === "left-block" && (
-            <span className={iconClassNames}>{icon}</span>
+          {icon && (
+            <span className="List-item-icon text-default flex align-center">
+              {icon}
+            </span>
           )}
           <div>
-            {name && (
-              <div className="flex align-center">
-                {icon && iconPosition === "near-name" && (
-                  <span className={iconClassNames}>{icon}</span>
-                )}
-                <h4 className="List-item-title ml1 text-wrap inline">{name}</h4>
-              </div>
-            )}
+            {name && <h4 className="List-item-title ml1 text-wrap">{name}</h4>}
             {description && (
-              <p className={descriptionClassNames}>{description}</p>
+              <p className="List-item-description ml1 text-wrap">
+                {description}
+              </p>
             )}
           </div>
         </a>

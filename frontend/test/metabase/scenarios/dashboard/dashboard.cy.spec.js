@@ -32,6 +32,7 @@ describe("scenarios > dashboard", () => {
     cy.findByLabelText("Description").type("Desc");
     cy.findByText("Create").click();
     cy.findByText("This dashboard is looking empty.");
+    cy.findByText("You're editing this dashboard.");
 
     // See it as a listed dashboard
     cy.visit("/collection/root?type=dashboard");
@@ -326,7 +327,7 @@ describe("scenarios > dashboard", () => {
     expectedRouteCalls({ route_alias: "fetchFieldValues", calls: 0 });
   });
 
-  it.skip("should be possible to visit a dashboard with click-behavior linked to the dashboard without permissions (metabase#15368)", () => {
+  it("should be possible to visit a dashboard with click-behavior linked to the dashboard without permissions (metabase#15368)", () => {
     cy.request("GET", "/api/user/current").then(
       ({ body: { personal_collection_id } }) => {
         // Save new dashboard in admin's personal collection
