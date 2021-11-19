@@ -126,12 +126,10 @@ function getParametersMappedToCard(
 
       if (mapping) {
         return {
-          // ...parameter,
-          type,
-          slug: parameter.slug,
-          // value: normalizeParameterValue(type, value),
+          ...parameter,
           target: mapping.target,
-          id: parameter.id,
+          // this `dashboardId` isn't used yet, but maybe use it to determine endpoints?
+          dashboardId: mapping.dashboard_id,
         };
       }
     })
@@ -234,7 +232,6 @@ export function questionUrlWithParameters(
     parametersMappedToCard,
   );
 
-  console.log({ questionsWithAddedParameters });
   return questionsWithAddedParameters.getUrlWithParameters();
 
   // // If we have a clean question without parameters applied, don't add the dataset query hash
