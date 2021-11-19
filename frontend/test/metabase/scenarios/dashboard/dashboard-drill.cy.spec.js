@@ -2,7 +2,7 @@ import {
   restore,
   modal,
   popover,
-  tooltip,
+  tippyPopover,
   filterWidget,
   showDashboardCardActions,
 } from "__support__/e2e/cypress";
@@ -737,7 +737,7 @@ describe("scenarios > dashboard > dashboard drill", () => {
             .first()
             .trigger("mousemove");
 
-          tooltip().within(() => {
+          tippyPopover().within(() => {
             testPairedTooltipValues("AXIS", "1");
             testPairedTooltipValues("VALUE", "5");
           });
@@ -746,7 +746,7 @@ describe("scenarios > dashboard > dashboard drill", () => {
             .last()
             .trigger("mousemove");
 
-          tooltip().within(() => {
+          tippyPopover().within(() => {
             testPairedTooltipValues("AXIS", "1");
             testPairedTooltipValues("VALUE", "10");
           });

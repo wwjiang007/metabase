@@ -3,6 +3,7 @@ import {
   setupSMTP,
   describeWithToken,
   popover,
+  tippyPopover,
   mockSessionProperty,
   sidebar,
   mockSlackConfigured,
@@ -99,7 +100,7 @@ describe("scenarios > dashboard > subscriptions", () => {
         cy.findByText("Email it").click();
         cy.findByPlaceholderText("Enter user names or email addresses").click();
 
-        popover().isRenderedWithinViewport();
+        tippyPopover().isRenderedWithinViewport();
       });
     });
 
