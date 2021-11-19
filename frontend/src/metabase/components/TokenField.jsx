@@ -5,9 +5,8 @@ import { findDOMNode } from "react-dom";
 import _ from "underscore";
 import cx from "classnames";
 
-import OnClickOutsideWrapper from "metabase/components/OnClickOutsideWrapper";
 import Icon from "metabase/components/Icon";
-import Popover from "metabase/components/Popover";
+import TippyPopover from "metabase/components/Popover/TippyPopover";
 import { TokenFieldAddon, TokenFieldItem } from "./TokenField.styled";
 
 import {
@@ -669,22 +668,15 @@ const DefaultTokenFieldLayout = ({
   isFocused,
   onClose,
 }) => (
-  <OnClickOutsideWrapper handleDismissal={onClose}>
-    <div>
-      {valuesList}
-      <Popover
-        isOpen={isFocused && !!optionsList}
-        hasArrow={false}
-        tetherOptions={{
-          attachment: "top left",
-          targetAttachment: "bottom left",
-          targetOffset: "10 0",
-        }}
-      >
-        {optionsList}
-      </Popover>
-    </div>
-  </OnClickOutsideWrapper>
+  <TippyPopover
+    offset={[0, 10]}
+    interactive
+    visible={isFocused && !!optionsList}
+    content={optionsList}
+    placement="bottom-start"
+  >
+    <div>{valuesList}</div>
+  </TippyPopover>
 );
 
 DefaultTokenFieldLayout.propTypes = {
