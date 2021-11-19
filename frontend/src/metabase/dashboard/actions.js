@@ -978,10 +978,6 @@ export const navigateToNewCardFromDashboard = createThunkAction(
     const metadata = getMetadata(getState());
     const { dashboardId, dashboards, parameterValues } = getState().dashboard;
     const dashboard = dashboards[dashboardId];
-    const cardIsDirty = !_.isEqual(
-      previousCard.dataset_query,
-      nextCard.dataset_query,
-    );
     const cardAfterClick = getCardAfterVisualizationClick(
       nextCard,
       previousCard,
@@ -1008,7 +1004,6 @@ export const navigateToNewCardFromDashboard = createThunkAction(
           dashboard.parameters,
           parameterValues,
           dashcard && dashcard.parameter_mappings,
-          cardIsDirty,
         );
 
     open(url, {
