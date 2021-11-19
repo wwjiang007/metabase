@@ -4,6 +4,11 @@ export function isDimensionTarget(target) {
   return target?.[0] === "dimension";
 }
 
+export function getTemplateTagFromTarget(target) {
+  const [, [type, tag]] = target;
+  return type === "template-tag" ? tag : null;
+}
+
 export function getParameterTargetField(target, metadata, question) {
   if (isDimensionTarget(target)) {
     const dimension = Dimension.parseMBQL(
