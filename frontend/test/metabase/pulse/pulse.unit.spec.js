@@ -16,7 +16,7 @@ const TEST_USERS = [
 
 describe("recipient picker", () => {
   describe("focus", () => {
-    it("should be focused if there are no recipients", () => {
+    it("should be focused if there are no recipients", async () => {
       render(
         <RecipientPicker
           recipients={[]}
@@ -26,10 +26,10 @@ describe("recipient picker", () => {
         />,
       );
       // Popover with all names should be open on focus
-      screen.getByText("Barb");
-      screen.getByText("Dustin");
+      await screen.findByText("Barb");
+      await screen.findByText("Dustin");
     });
-    it("should not be focused if there are existing recipients", () => {
+    it("should not be focused if there are existing recipients", async () => {
       render(
         <RecipientPicker
           recipients={[TEST_USERS[0]]}
@@ -38,8 +38,9 @@ describe("recipient picker", () => {
           onRecipientsChange={() => alert("why?")}
         />,
       );
+
       // Now only the recipient name should be visible
-      screen.getByText("Barb");
+      await screen.findByText("Barb");
       expect(screen.queryByText("Dustin")).toBeNull();
     });
   });
